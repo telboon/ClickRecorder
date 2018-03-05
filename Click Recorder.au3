@@ -20,6 +20,7 @@ HotKeySet("+e", "addRight") ; add right click
 HotKeySet("+r", "addNo") ; add no click
 
 HotKeySet("+{ENTER}", "addEnter") ; add enter
+HotKeySet("+{ESC}", "addEsc") ; add enter
 
 HotKeySet("+a", "showSteps") ; show steps
 HotKeySet("+s", "runAll") ; run script
@@ -134,6 +135,20 @@ Func addEnter()
    $current=$current+1
 EndFunc
 
+Func addEsc()
+   $memoryX[$current]=mousegetpos(0)
+   $memoryY[$current]=mousegetpos(1)
+   $clicks[$current]=4 ; Esc
+   if $current=0 Then
+	  $startTime=_Timer_Init()
+	  $delays[$current]=0
+   Else
+	  $delays[$current] = _Timer_Diff($startTime)-$lastTime
+	  $lastTime = _Timer_Diff($startTime)
+   EndIf
+   $current=$current+1
+EndFunc
+
 Func showSteps()
    Local $printer=""
    For $i = 0 to $current-1
@@ -147,6 +162,8 @@ Func showSteps()
 		 $printer=$printer&"No Click: "
 	  ElseIf $clicks[$i]=3 Then
 		 $printer=$printer&"Enter Key: "
+		 ElseIf $clicks[$i]=4 Then
+		 $printer=$printer&"ESC Key: "
 	  EndIf
 
 	  $printer=$printer&$memoryX[$i]&", "&$memoryY[$i]&@CRLF&@CRLF
@@ -176,6 +193,8 @@ Func runAll()
 			MouseMove( $memoryX[$i], $memoryY[$i]); if nothing so do nothing
 		 ElseIf $clicks[$i]=3 Then
 			Send("{ENTER}")
+		 ElseIf $clicks[$i]=4 Then
+			Send("{ESC}")
 		 endif
 	  Next
    Next
@@ -237,6 +256,8 @@ Func fileLoad()
 			   $clicks[$current]=2
 			ElseIf $commands[1]="E" Then
 			   $clicks[$current]=3
+			ElseIf $commands[1]="X" Then
+			   $clicks[$current]=4
 			endif
 
 			$memoryX[$current]=$commands[2]*1
@@ -269,6 +290,8 @@ Func fileSave()
 		 $line="N "
 	  ElseIf $clicks[$i]=3 Then
 		 $line="E "
+	  ElseIf $clicks[$i]=4 Then
+		 $line="X "
 	  EndIf
 
 	  $line=$line&$memoryX[$i]&" " & $memoryY[$i] & " " & $delays[$i]
